@@ -1,0 +1,139 @@
+
+.eduzen {
+    font-family: Helvetica Neue, Arial, sans-serif;
+}
+
+.eduzen #header {
+    margin-left: 20px; margin-top: 20px; margin-bottom: 20px;
+}
+
+.eduzen #tpl-header {
+    height: 100px;
+}
+
+.eduzen #content {
+    margin-left: 20px;
+}
+
+.eduzen .title {
+    font-weight: bold;
+}
+
+.eduzen #result-header {
+    margin-left: 10px;
+    font-size: 12px;
+    color: #a9a9a9;
+}
+
+.eduzen #two-column {
+    float: left;
+    width: 95%;
+}
+
+.eduzen #results {
+    float: left;
+    width: 45%;
+    max-height: 800px;
+}
+
+.eduzen #result-list {
+    float: left;
+    width: 90%;
+}
+
+#page .name {
+    display: block;
+}
+
+#page .description {
+    display: block;
+    margin: 4px;
+}
+
+#page .associations {
+    display: block;
+}
+
+#page .topicalarea {
+    background-color: #12b4d7; color: #4a4a4a;
+    padding: 4px; font-size:12px; margin: 4px;
+}
+
+.topicalarea a {
+    cursor: pointer; text-decoration: none;
+}
+
+.eduzen #page {
+    width: 40%;
+    min-width: 280px;
+    float: right;
+    display: none;
+    border: 1px solid #ccc;
+    margin-right: 20px;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+.eduzen .result-item {
+    cursor: pointer;
+}
+
+.eduzen ol {
+    padding-left: 0px;
+    margin-left: 25px;
+    margin-top: 20px;
+}
+
+.eduzen li {
+    margin-top: 2px;
+}
+
+.eduzen li a {
+    text-decoration: none; display: block; 
+    color: #000000; padding: 4px;
+}
+
+.eduzen li a:hover {
+    background-color: #4B0A1E;
+    color: #BA8A92;
+}
+
+.eduzen li .more-info {
+    font-size: 12px;
+    color: #a9a9a9;
+    padding-left: 8px;
+}
+
+.eduzen input, textarea {
+    border: 1px solid #ccc; outline: none; min-height: 30px;
+    padding-left: 6px; padding-right: 6px;
+}
+
+.eduzen input.inputfield {
+    min-width: 280px;
+    width: 35%;
+}
+
+.eduzen input.button {
+    font-weight: bold;
+    background-color: #fff;
+    padding: 8px;
+}
+
+.eduzen input:focus,
+.eduzen li a:focus {
+    border: 2px dashed #000077;
+}
+
+.eduzen textarea {
+    margin-bottom: 15px; margin-top: 5px;
+    height: 200px; width: 250px;
+}
+
+.eduzen label {
+    display: block;
+}
+
+.eduzen button {
+    padding: 6px; height: 30px
+}

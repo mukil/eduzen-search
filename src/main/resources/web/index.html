@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+  <title>eduZEN - Aufgabenarchiv</title>
+  <link rel="stylesheet" href="de.tu-berlin.eduzen.tasks/style/styles.css" />
+  <script src="de.tu-berlin.eduzen.tasks/script/vendor/jquery-1.7.1.min.js"></script>
+  <script src="de.tu-berlin.eduzen.tasks/script/vendor/rest_client.js"></script>
+  <script src="de.tu-berlin.eduzen.tasks/script/vendor/eduzen_dictionary.js"></script>
+  <script src="de.tu-berlin.eduzen.tasks/script/mathtasks.js"></script>
+
+</head>
+
+<body class="eduzen">
+
+<div id="header">
+  <span class="title">
+    Hier k&ouml;nnen Sie das EducationZEN Aufgabenarchiv durchsuchen
+  </span>
+</div>
+
+<div id="content">
+
+  <form name="search" action="javascript:filter.doSearch()">
+    <input name="searchfield" class="inputfield" type="text"
+      placeholder="Name, Beschreibung oder Inhalt der Aufgabenstellung"></input>
+    <input name="do-search" type="submit" class="button" value="Suchen"></button>
+  </form>
+
+  <div id="result-header"><span id="result-count"></span></div>
+
+  <div id="two-column">
+    <div id="results"><ol id="result-list"></ol></div>
+    <div id="page"></div>
+  </div>
+
+</div>
+
+</body>
+</html>
