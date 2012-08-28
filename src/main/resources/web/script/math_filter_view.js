@@ -112,28 +112,52 @@ var filter = new function () {
     var excercise = dmc.get_topic_by_id(eId)
     var nameOfExcercise = excercise.composite['tub.eduzen.excercise_name'].value
     var descriptionOfExcercise = excercise.composite['tub.eduzen.excercise_description'].value
-    var objectOfExcercise = "" // TODO
-    var pasteValue = nameOfExcercise + descriptionOfExcercise + objectOfExcercise
-    $("#page").html("<span class=\"name\">" + nameOfExcercise + "</span>")
+    $("#page").html("<span class=\"label\">Aufgabenstellung</span><br/>")
+    $("#page").append("<span class=\"name\"><a href=\"#doshow?id=" + excercise.id + "\" id=\""
+      + excercise.id + "\" >" + nameOfExcercise + "</a></span>")
     $("#page").append("<span class=\"description\">" + descriptionOfExcercise + "</span>")
-    /** $("#page").append("<a href=\"javascript:filter.copyToClipboard("
-      + pasteValue + ")\">copy + paste excercise</a>") */
     $("#page").show()
 
+    /** var pasteValue = nameOfExcercise + descriptionOfExcercise
+    $("#page").append("<a href=\"javascript:filter.copyToClipboard("
+      + pasteValue + ")\">copy + paste excercise</a>") */
+
+    var excerciseObjects = dmc.get_related_topics(eId, {"assoc_type_uri": "tub.eduzen.compatible",
+      "others_topic_type_uri": "tub.eduzen.excercise_object"})
+    if (excerciseObjects.total_count > 0) {
+      $("#page").append("<br/><span class=\"label\">Zu dieser Aufgabenstellung sind folgende "
+        + "Aufgabenobjekte kompatibel:</span><br/>")
+      var objectString = "<ul class=\"objects\">"
+      for (object in excerciseObjects.items) {
+        var excerciseObject = excerciseObjects.items[object]
+        objectString += "<li><a class=\"excercise-object\" id=\"" + excerciseObject.id
+          + "\" href=\"javascript:filter.clickExcerciseObject(" + excerciseObject.id + ")\">"
+          + excerciseObject.value +"</a></li>"
+      }
+      objectString += "</ul>"
+      $("#page").append(objectString)
+    }
+
     var topicalareas = dmc.get_related_topics(excercise.id, {"others_topic_type_uri": "tub.eduzen.topicalarea"})
+    $("#page").append("<br/><span class=\"label\">Diese Aufgabenstellung ist verbunden "
+      + "mit dem/den Themenkomplex(en):</span>")
     for (topic in topicalareas.items) {
       var topicalarea = topicalareas.items[topic]
-      $("#page").append("<span class=\"associations\">"
-        + "<a class=\"topicalarea\" id=\"" + topicalarea.id
+      $("#page").append("<span class=\"associations\"><a class=\"topicalarea\" id=\"" + topicalarea.id
         + "\" href=\"javascript:filter.clickTopicalArea(" + topicalarea.id + ")\">"
         + topicalarea.value +"</a></span>")
     }
   }
   
   this.clickTopicalArea = function (topicalId) {
-    console.log("doSomething with " + topicalId)
+    var excerciseTexts = filter.get_excercises_by_topicalarea(topicalId)
+    filter.showResults(excerciseTexts)
   }
-  
+
+  this.clickExcerciseObject = function (objectId) {
+    console.log("doSomething with Excercise Object (" + objectId  + ")")
+  }
+
   this.copyToClipboard = function (text) {
     window.prompt ("Copy to clipboard: STRG+C, Enter", text)
   }
@@ -154,8 +178,12 @@ var filter = new function () {
   this.push_history = function (state, link) {
     if (!filter.historyApiSupported) return
 
-    var history_entry = {state: state, url: "de.tu-berlin.eduzen.tasks" + link}
+    var history_entry = {state: state, url: link}
     window.history.pushState(history_entry.state, null, history_entry.url)
+  }
+
+  this.get_excercises_by_topicalarea = function(id) {
+    return dmc.request("GET", "/eduzen/excercise/by_topicalarea/" + id, "application/json", false)
   }
 
 }

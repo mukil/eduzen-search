@@ -4,9 +4,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Eduzen Math Tasks</name>
+    <name>Eduzen Excercise Filter View</name>
     <groupId>de.tu-berlin.eduzen</groupId>
-    <artifactId>tasks</artifactId>
+    <artifactId>excercise-filter-view</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
@@ -29,5 +29,21 @@
             <version>4.0.12-SNAPSHOT</version>       <!-- newer version of DeepaMehta is available. -->
         </dependency>                                <!-- If your plugin has no Java code at all,   -->
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-Activator>   <!-- fully qualified name of your plugin "main" class. -->
+                            de.deepamehta.plugins.eduzen.filterview.ExcerciseFilterViewPlugin
+                        </Bundle-Activator>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

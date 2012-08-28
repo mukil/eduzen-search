@@ -19,6 +19,16 @@
     font-weight: bold;
 }
 
+.eduzen .label {
+    color: #a9a9a9;
+    padding: 4px;
+    padding-left: 0px;
+}
+
+.label.small {
+    font-size: 12px;
+}
+
 .eduzen #result-header {
     margin-left: 10px;
     font-size: 12px;
@@ -41,8 +51,30 @@
     width: 90%;
 }
 
+.eduzen ul.objects {
+    color: #fff;
+    padding-left: 0px;
+}
+
+.eduzen ul.objects li {
+    border: 1px solid #ffc700;
+    padding: 4px; margin: 4px;
+}
+
+.eduzen .label {
+    padding-bottom: 8px;
+}
+
+.eduzen .name a {
+    text-decoration: none;
+    color: #000;
+    padding-top: 4px; 
+    padding-bottom: 4px;
+}
+
 #page .name {
     display: block;
+    margin-top: 4px;
 }
 
 #page .description {
@@ -52,25 +84,27 @@
 
 #page .associations {
     display: block;
+    margin: 6px; margin-left: 0px;
 }
 
 #page .topicalarea {
     background-color: #12b4d7; color: #4a4a4a;
-    padding: 4px; font-size:12px; margin: 4px;
+    padding: 4px; font-size:12px;
 }
 
-.topicalarea a {
-    cursor: pointer; text-decoration: none;
+#page a.topicalarea {
+    cursor: pointer; text-decoration: none; font-weight: bold;
 }
 
 .eduzen #page {
     width: 40%;
-    min-width: 280px;
+    min-width: 320px;
     float: right;
     display: none;
     border: 1px solid #ccc;
     margin-right: 20px;
     margin-top: 20px;
+    margin-bottom: 20px;
     padding: 10px;
 }
 
@@ -93,10 +127,10 @@
     color: #000000; padding: 4px;
 }
 
-.eduzen li a:hover {
+/** .eduzen li a:hover {
     background-color: #4B0A1E;
     color: #BA8A92;
-}
+} **/
 
 .eduzen li .more-info {
     font-size: 12px;
@@ -116,13 +150,43 @@
 
 .eduzen input.button {
     font-weight: bold;
-    background-color: #fff;
-    padding: 8px;
+    /** background-color: #fff; **/
+    padding: 8px; color: #fff;
 }
 
+eduzen input.button:focus {
+    color:#fff;
+    border: 1px solid #ffc700;
+}
+
+.eduzen input.button {
+  background-image: linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
+  background-image: -o-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
+  background-image: -moz-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
+  background-image: -webkit-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
+  background-image: -ms-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
+
+  background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.36, rgb(8,87,144)),
+    color-stop(0.68, rgb(34,114,173))
+  );
+}
+
+.eduzen a:focus,
 .eduzen input:focus,
 .eduzen li a:focus {
-    border: 2px dashed #000077;
+    border: 1px solid #12b4d7;
+}
+
+.eduzen a, eduzen li a {
+    border: 1px solid #fff;
+}
+
+.eduzen .topicalarea a:focus {
+    border: 1px solid #4a4a4a;
 }
 
 .eduzen textarea {
