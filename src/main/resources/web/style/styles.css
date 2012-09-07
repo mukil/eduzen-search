@@ -3,16 +3,33 @@
     font-family: Helvetica Neue, Arial, sans-serif;
 }
 
-.eduzen #header {
-    margin-left: 20px; margin-top: 20px; margin-bottom: 20px;
+.eduzen p {
+  margin: 0.5em;
 }
 
-.eduzen #tpl-header {
-    height: 100px;
+.eduzen #header {
+    margin-left: 20px; margin-top: 20px;
+    background-color: #fff;
+}
+
+.eduzen #top-form {  }
+
+.eduzen #two-column {
+    float: left;
 }
 
 .eduzen #content {
-    margin-left: 20px;
+    /** position: relative;
+    top: 165px; **/
+}
+
+.eduzen #bottom {
+    position: fixed;
+    bottom: 0px; left: 0px; padding: 4px;
+    max-height: 130px;
+    border-top: 2px solid #12b4d7;
+    background-color: #fff;
+    width: 100%;
 }
 
 .eduzen .title {
@@ -30,25 +47,19 @@
 }
 
 .eduzen #result-header {
-    margin-left: 10px;
     font-size: 12px;
     color: #a9a9a9;
 }
 
-.eduzen #two-column {
-    float: left;
-    width: 95%;
-}
-
 .eduzen #results {
     float: left;
-    width: 45%;
-    max-height: 800px;
+    overflow-y: scroll;
+    max-height: 70%;
+    padding-right: 20px;
 }
 
 .eduzen #result-list {
     float: left;
-    width: 90%;
 }
 
 .eduzen ul.objects {
@@ -59,6 +70,27 @@
 .eduzen ul.objects li {
     border: 1px solid #ffc700;
     padding: 4px; margin: 4px;
+}
+
+.eduzen .excercise-view {
+    border: 1px dashed #a9a9a9;
+    padding: 4px; margin: 4px; margin-left: 0px;
+}
+
+/** Typography, Buttons and Emphasizers **/
+
+.eduzen .title {
+    font-weight: bold;
+}
+
+.eduzen .label {
+    color: #a9a9a9;
+    padding: 4px;
+    padding-left: 0px;
+}
+
+.label.small {
+    font-size: 12px;
 }
 
 .eduzen .label {
@@ -72,41 +104,39 @@
     padding-bottom: 4px;
 }
 
-#page .name {
+.eduzen .name {
     display: block;
     margin-top: 4px;
 }
 
-#page .description {
+.eduzen .description {
     display: block;
     margin: 4px;
 }
 
-#page .associations {
-    display: block;
-    margin: 6px; margin-left: 0px;
+.eduzen .associations {
+    display: inline margin: 4px;
 }
 
-#page .topicalarea {
+.eduzen .topicalarea {
     background-color: #12b4d7; color: #4a4a4a;
-    padding: 4px; font-size:12px;
+    padding: 2px; font-size:12px; padding-left: 4px; padding-right: 4px;
 }
 
-#page a.topicalarea {
+.eduzen a.topicalarea {
     cursor: pointer; text-decoration: none; font-weight: bold;
 }
 
-.eduzen #page {
-    width: 40%;
+/** .eduzen #page {
     min-width: 320px;
-    float: right;
     display: none;
     border: 1px solid #ccc;
     margin-right: 20px;
     margin-top: 20px;
     margin-bottom: 20px;
+    margin-left:20px;
     padding: 10px;
-}
+} **/
 
 .eduzen .result-item {
     cursor: pointer;
@@ -119,12 +149,12 @@
 }
 
 .eduzen li {
-    margin-top: 2px;
+    margin-bottom: 10px;
 }
 
 .eduzen li a {
-    text-decoration: none; display: block; 
-    color: #000000; padding: 4px;
+    text-decoration: none;
+    color: #000000;
 }
 
 /** .eduzen li a:hover {
@@ -135,7 +165,18 @@
 .eduzen li .more-info {
     font-size: 12px;
     color: #a9a9a9;
-    padding-left: 8px;
+    /** padding-left: 4px; **/
+    margin: 4px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.eduzen li .sample-solution.true {
+  font-size: 12px; text-transform: uppercase; color: #00ff00;
+}
+
+.eduzen li .sample-solution.false {
+  font-size: 12px; text-transform: uppercase; color: #ff0000;
 }
 
 .eduzen input, textarea {
@@ -160,19 +201,19 @@ eduzen input.button:focus {
 }
 
 .eduzen input.button {
-  background-image: linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
-  background-image: -o-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
-  background-image: -moz-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
-  background-image: -webkit-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
-  background-image: -ms-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
+    background-image: linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
+    background-image: -o-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
+    background-image: -moz-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
+    background-image: -webkit-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
+    background-image: -ms-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
 
-  background-image: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.36, rgb(8,87,144)),
-    color-stop(0.68, rgb(34,114,173))
-  );
+    background-image: -webkit-gradient(
+      linear,
+      left bottom,
+      left top,
+      color-stop(0.36, rgb(8,87,144)),
+      color-stop(0.68, rgb(34,114,173))
+    );
 }
 
 .eduzen a:focus,

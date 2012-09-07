@@ -4,10 +4,11 @@
 
   <title>eduZEN - Aufgabenarchiv</title>
   <link rel="stylesheet" href="style/styles.css" />
-  <script src="script/vendor/jquery-1.7.1.min.js"></script>
-  <script src="script/vendor/rest_client.js"></script>
-  <script src="script/vendor/eduzen_dictionary.js"></script>
-  <script src="script/math_filter_view.js"></script>
+  <script type="text/javascript" src="script/vendor/jquery-1.7.1.min.js"></script>
+  <script type="text/javascript" src="script/vendor/rest_client.js"></script>
+  <script type="text/javascript" src="script/vendor/eduzen_dictionary.js"></script>
+  <script type="text/javascript" src="script/vendor/sha256.js"></script>
+  <script type="text/javascript" src="script/math_filter_view.js"></script>
 
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
@@ -17,25 +18,26 @@
 
 <div id="header">
   <span class="title">
-    Hier k&ouml;nnen Sie das EducationZEN Aufgabenarchiv durchsuchen
+    Hier k&ouml;nnen Sie das EducationZEN Aufgabenarchiv durchsuchen <a href="#login" id="login-btn" onclick="javascript:filter.login()">Login</a>
   </span>
-</div>
+  <br/><br/>
 
-<div id="content">
-
-  <form name="search" action="javascript:filter.doSearch()">
+  <form id="top-form" name="search" action="javascript:filter.doSearch()">
     <input name="searchfield" class="inputfield" type="text"
       placeholder="Name, Beschreibung oder Inhalt der Aufgabenstellung"></input>
     <input name="do-search" type="submit" class="button" value="Suchen"></button>
   </form>
-
   <div id="result-header"><span id="result-count"></span></div>
+</div>
+
+<div id="content">
 
   <div id="two-column">
     <div id="results"><ol id="result-list"></ol></div>
-    <div id="page"></div>
+    <!-- div id="page"></div -->
   </div>
 
+  <div id="bottom"><b class="label">Auswahl f&uuml;r Ihren &Uuml;bungszettel</b></div>
 </div>
 
 </body>
