@@ -6,16 +6,23 @@
 
 var dmc = new RESTClient("http://localhost:8080/core")
 var dict = new eduzenDictionary("DE")
-var filter = new function () {
+
+var filterView = new function () {
 
   this.historyApiSupported = window.history.pushState
+
+  this.e_objects = {}
+  this.e_collection = new Array()
+  this.results = undefined
+
+  /** filterViews application controler **/
 
   this.initSearchView = function () { 
 
     // registering handler
-    $("[name=search]").submit(filter.doSearch)
+    $("[name=search]").submit(filterView.doSearch)
     window.addEventListener("popstate", function(e) {
-      if (e.state) filter.pop_history(e.state)
+      if (e.state) filterView.pop_history(e.state)
     })
     // handling deep links
     var entryUrl = window.location.href
@@ -25,12 +32,14 @@ var filter = new function () {
     if (commands[0] === "dosearch") {
       var value = commands[1].substr(commands[1].indexOf("=") + 1)
       $("[name=searchfield]").val("" + value + "")
-      filter.doSearch(value)
+      filterView.doSearch(value)
     } else if (commands[0] === "doshow") {
       var exId = parseInt(commands[1].substr(commands[1].indexOf("=") + 1))
-      filter.showResultItem(undefined, exId)
+      filterView.showResultItem(undefined, exId)
     }
   }
+
+  /** Controler for the search functionality **/
 
   this.doSearch = function (searchFor) {
     var searchValue = ""
@@ -60,35 +69,35 @@ var filter = new function () {
     // fixme: build up query object, too
 
     // updating gui after a query
-    filter.showResultHeader(resultObject)
-    filter.showResults(excercise_names.concat(excercise_descs))
+    filterView.showResultHeader(resultObject)
+    filterView.results = excercise_names.concat(excercise_descs)
+    filterView.showResults()
 
-    filter.push_history({"action": "dosearch", "parameter": resultObject}, "#dosearch?for=" + searchValue)
+    filterView.push_history({"action": "dosearch", "parameter": resultObject}, "#dosearch?for=" + searchValue)
   }
 
   this.showResultHeader = function (rO) {
     if (rO.size == 0) {
       $("#result-count").html("Ihre Anfrage nach \"" + rO.searchFor + "\" lieferte keine Ergebnisse.")
-      filter.emptyResultList()
+      filterView.emptyResultList()
       return
     }
     $("#result-count").html("Ihre Anfrage nach \"" + rO.searchFor + "\" lieferte <b>"
       + rO.size + "</b> von " + rO.overallCount + " insg. Aufgabenstellungen")
   }
 
-  /** renders list of search resulting excercises with querying for each:
-      - excercise_texts if not given
-      - related topicalareas via excercise_texts
-      - sample solutions via taken excercises
+  /** 
+   *  Controlling for displaying and querying a complete list of search results ..
+   *  including many async queries _for each_ result item (to fetch excercise_texts, topicalareas and sample solutions)
    **/
-  this.showResults = function (rL) { // eats list of excercise_texts or list of excercise_names
-    filter.emptyResultList()
 
-    for (item in rL) { // for each result item
-      var result = rL[item]
+  this.showResults = function () {
+    filterView.emptyResultList()
+
+    for (i=0; i < filterView.results.length; i++) { // for each result item
+      var result = filterView.results[i]
       var moreOutput = "<li id=\"" + result.id + "\" class=\"result-item\">"
-        + "<a id=\"" + result.id + "\" href=\"javascript:void(0)\">" + result.value + "</a>"
-      // taken the eText
+        + "<a class=\"item-handler\">" + result.value + "</a>"
       var hasSampleSolution = false
       var excerciseText = { items: new Array(), total_count: 1}
       if (result.type_uri === "tub.eduzen.excercise_text") {
@@ -129,7 +138,7 @@ var filter = new function () {
           for (topic in topicalareas.items) {
             var topicalarea = topicalareas.items[topic]
             moreOutput += "<span class=\"associations\"><a class=\"topicalarea\" id=\"" + topicalarea.id
-              + "\" href=\"javascript:filter.clickTopicalArea(" + topicalarea.id + ")\">"
+              + "\" href=\"javascript:filterView.clickTopicalArea(" + topicalarea.id + ")\">"
               + topicalarea.value +"</a></span>"
           }
         }
@@ -137,7 +146,8 @@ var filter = new function () {
       moreOutput += "</span></li>"
       $("#result-list").append(moreOutput)
     }
-    $(".result-item").click(filter.showResultItem); // fixme: registering multiple handler
+
+    $("a.item-handler", "#result-list").click(filterView.showResultItem);
   }
 
   this.emptyResultList = function () {
@@ -148,13 +158,15 @@ var filter = new function () {
     $(".excercise-view").hide()
   }
 
-  this.showResultItem = function (e, id) {
+  /** Controlling display of a specific excercise by given id or given DOM-target **/
 
+  this.showResultItem = function (e, id) {
+    // this handler is currently also registered for excercise_objects..
     var exId = ""
     var targetId = undefined
     var result = undefined
     if (e != undefined) { // manually clicked
-      targetId = parseInt(e.target.id)
+      targetId = parseInt(e.target.parentElement.id)
       result = dmc.get_topic_by_id(targetId)
       var excerciseTopic = { items: new Array(), total_count: 1}
       if (result.type_uri === "tub.eduzen.excercise_text") {
@@ -171,25 +183,30 @@ var filter = new function () {
     } else { // programmatically called showResultItem, yet unused
       exId = id
     }
-    filter.showExcercise(exId, targetId)
-    filter.push_history({"action": "doshow", "parameter": exId}, "#doshow?id=" + exId)
+    filterView.showExcercise(exId, targetId)
+    filterView.push_history({"action": "doshow", "parameter": exId}, "#doshow?id=" + exId)
   }
-  
-  this.showExcercise = function (eId, tId) { // takes only list of excercise_names
+
+  this.showExcercise = function (eId, tId) {
     var parentRenderer = "#"
     var excercise = dmc.get_topic_by_id(eId)
     var nameOfExcercise = excercise.composite['tub.eduzen.excercise_name'].value
     var descriptionOfExcercise = excercise.composite['tub.eduzen.excercise_description'].value
 
-    if (tId == undefined) { // programmatically clicked, show some result list first
-      filter.showResults([excercise])
+    if (tId == undefined) { // programmatically called, to show some result-list
+      filterView.results = [excercise]
+      filterView.showResults()
       // excerciseId is resultItemList.targetId
-      filter.showExcercise(excercise.id, excercise.id) // simulate manual selection of resultItem
+      // no recursive call making sure tId != undefined
+      filterView.showExcercise(excercise.id, excercise.id) // simulate manual selection of resultItem
+      $(parentRenderer + " .excercise-view").show()
+      return
     } else {
-      parentRenderer += tId // manually clicked, go on and toggle excercise in resultList
+      parentRenderer = parentRenderer + "" + tId // manually clicked, go on and toggle excercise in resultList
     }
 
-    if ($(parentRenderer + " .excercise-view").length > 0) { // if excercise view was already loaded, just show it
+    if ($(parentRenderer + " .excercise-view").length > 0) {
+      // if excercise view was already loaded, just show it
       $(parentRenderer + " .excercise-view").toggle()
       return
     } else {
@@ -203,64 +220,143 @@ var filter = new function () {
       viewOutput += "<span class=\"description\">" + descriptionOfExcercise + "</span>"
 
       /** var pasteValue = nameOfExcercise + descriptionOfExcercise
-      $("#page").append("<a href=\"javascript:filter.copyToClipboard("
+      $("#page").append("<a href=\"javascript:filterView.copyToClipboard("
         + pasteValue + ")\">copy + paste excercise</a>") */
 
       var excerciseObjects = dmc.get_related_topics(eId, {"assoc_type_uri": "tub.eduzen.compatible",
         "others_topic_type_uri": "tub.eduzen.excercise_object"})
       if (excerciseObjects.total_count > 0) {
-        viewOutput += "<span class=\"label\">Dazu kompatible Aufgabenobjekte:</span><br/>"
+        viewOutput += "<br/><span class=\"label\">Dazu kompatible Aufgabenobjekte:</span><br/>"
 
         var objectString = "<ul class=\"objects\">"
         for (object in excerciseObjects.items) {
           var excerciseObject = excerciseObjects.items[object]
-          objectString += "<li><a class=\"excercise-object\" id=\"" + excerciseObject.id
-            + "\" href=\"javascript:filter.clickExcerciseObject(" + excerciseObject.id + ")\">"
-            + excerciseObject.value +"</a></li>"
+          objectString += "<li id=\"" + excerciseObject.id + "\""
+            + "onclick=\"javascript:filterView.toggleExcerciseObject(" + excerciseObject.id
+            + ", " + eId + ")\"><a class=\"excercise-object\">" + excerciseObject.value +"</a></li>"
         }
         objectString += "</ul>"
         viewOutput += objectString
+        viewOutput += "<div class=\"add-excercise button disabled " + eId + "\"><a>Aufgabe ausw&auml;hlen"
+          + "</a></div><div class=\"add-excercise-object label hint\">"
+          + "Hinweis: Um diese Aufgabe Ihrem &Uuml;bungszettel hinzuf&uuml;gen zu k&ouml;nnen,"
+          + "w&auml;hlen Sie bitte mind. 1 dazu kompatibles <i class=\"excercise-object\">Aufgabenobjekt</i>"
+          + "aus.</div>"
+      } else {
+        viewOutput += "<div class=\"add-excercise button " + eId
+          + "\" onclick=\"javascript:filterView.selectExcercise(" + eId + ")\">"
+          + "<a>Aufgabe ausw&auml;hlen</a></div>"
       }
       viewOutput += "</div>"
     $(parentRenderer).append(viewOutput)
     $(parentRenderer).show()
-
   }
   
   this.clickTopicalArea = function (topicalId) {
-    var excerciseTexts = filter.get_excercises_by_topicalarea(topicalId)
-    filter.showResults(excerciseTexts)
+    var excerciseTexts = filterView.get_excercises_by_topicalarea(topicalId)
+    filterView.results = excerciseTexts
+    filterView.showResults()
   }
 
-  this.clickExcerciseObject = function (objectId) {
-    console.log("doSomething with Excercise Object (" + objectId  + ")")
+  /** Controlling a collection of excercises **/
+
+  this.selectExcercise = function (eId) {
+    console.log("adding excercise " + eId + " to practice sheet ...")
+    filterView.addExcerciseToCollection(eId)
+    console.log(filterView.e_collection)
   }
+
+  this.addExcerciseToCollection = function (id) {
+    // in development, not yet working
+    if(typeof(id) == "object") {
+      id = parseInt(id.delegateTarget.parentElement.id)
+    }
+    filterView.e_collection.push(id)
+    console.log(filterView.e_collection)
+  }
+
+  /** Controlling one/many related excercise_objects for each listed excercise **/
+
+  this.toggleExcerciseObject = function (objectId, eId) {
+    if (filterView.e_objects[eId] != undefined) {
+      for (i=0; i < filterView.e_objects[eId].length; i++) {
+        excercise_object = filterView.e_objects[eId][i]
+        if (excercise_object == objectId) {
+          // remove excercise object again..
+          filterView.removeObjectFromExcercise(objectId, eId)
+          $("li#" + objectId + "").removeClass("selected")
+          filterView.toggleRenderingForExcercise(objectId, eId)
+          return
+        }
+      }
+    }
+    // model
+    filterView.addObjectToExcercise(objectId, eId)
+    // view
+    $("li#" + objectId + "").addClass("selected")
+    filterView.toggleRenderingForExcercise(objectId, eId)
+  }
+
+  this.toggleRenderingForExcercise = function (objectId, eId) {
+    if (filterView.e_objects[eId].length > 0) {
+      $(".add-excercise.button."+ eId).removeClass("disabled")
+      $(".add-excercise.button."+ eId).unbind("click")
+      $(".add-excercise.button."+ eId).click(filterView.addExcerciseToCollection)
+    } else {
+      $(".add-excercise.button."+ eId).addClass("disabled")
+      $(".add-excercise.button."+ eId).unbind("click")
+    }
+  }
+
+  this.addObjectToExcercise = function (object, excercise) {
+    if (filterView.e_objects[excercise] != undefined) {
+      filterView.e_objects[excercise].push(object)
+    } else {
+      filterView.e_objects[excercise] = [object]
+    }
+  }
+
+  this.removeObjectFromExcercise = function (object, excercise) {
+    if (filterView.e_objects[excercise] != undefined) {
+      for (i=0; i < filterView.e_objects[excercise].length; i++) {
+        excercise_object = filterView.e_objects[excercise][i]
+        if (excercise_object == object) {
+          filterView.e_objects[excercise].splice(i, 1)
+          return
+        }
+      }
+    }
+  }
+
+  /** More general methods **/
 
   this.copyToClipboard = function (text) {
     window.prompt ("Copy to clipboard: STRG+C, Enter", text)
   }
 
   this.pop_history = function (state) {
-    if (!filter.historyApiSupported) return
+    if (!filterView.historyApiSupported) return
     console.log("popping_")
     console.log(state)
     if (state.action == "dosearch") {
       var searchValue = state.parameter.searchFor
       $("[name=searchfield]").val("" + searchValue + "")
-      filter.doSearch(searchValue)
+      filterView.doSearch(searchValue)
     } else if (state.action == "doshow") {
       var exId = state.parameter
-      filter.showResultItem(undefined, exId)
+      filterView.showResultItem(undefined, exId)
     }
   }
 
   this.push_history = function (state, link) {
-    if (!filter.historyApiSupported) return
+    if (!filterView.historyApiSupported) return
     console.log("pushing_")
     console.log(state)
     var history_entry = {state: state, url: link}
     window.history.pushState(history_entry.state, null, history_entry.url)
   }
+
+  /** The FilterViews RESTClient-methods **/
 
   this.get_excercises_by_topicalarea = function(id) {
     return dmc.request("GET", "/eduzen/excercise/by_topicalarea/" + id, undefined, undefined, undefined, false)
@@ -284,4 +380,4 @@ var filter = new function () {
 
 }
 
-$(window).load(filter.initSearchView)
+$(window).load(filterView.initSearchView)

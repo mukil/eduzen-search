@@ -53,7 +53,7 @@
 
 .eduzen #results {
     float: left;
-    overflow-y: scroll;
+    overflow-y: auto;
     max-height: 70%;
     padding-right: 20px;
 }
@@ -69,15 +69,51 @@
 
 .eduzen ul.objects li {
     border: 1px solid #ffc700;
-    padding: 4px; margin: 4px;
+    padding: 4px; margin-top: 4px; margin-bottom: 4px;
+}
+
+.eduzen ul.objects li.selected {
+    border: 1px solid #2486bb;
 }
 
 .eduzen .excercise-view {
-    border: 1px dashed #a9a9a9;
     padding: 4px; margin: 4px; margin-left: 0px;
 }
 
+/** .excercise-view .complete {
+    border: none;
+}
+
+.excercise-view .incomplete {
+    border: 1px dashed #a9a9a9;
+} **/
+
+
+.eduzen .add-excercise-object {
+    padding: 4px; padding-right: 8px;
+    font-size: 12px;
+}
+
+.eduzen .add-excercise {
+    float:right; padding: 4px;
+    font-size: 12px;
+}
+
+.eduzen .add-excercise a:focus {
+  border: none;
+}
+
 /** Typography, Buttons and Emphasizers **/
+
+.eduzen .hint {
+    margin-top: 4px;
+}
+
+.eduzen .hint .excercise-object {
+    border: 1px solid #FFC700;
+    padding-left: 2px; padding-right: 2px;
+    margin-top: 4px; cursor: default; margin-right: 4px;
+}
 
 .eduzen .title {
     font-weight: bold;
@@ -111,7 +147,7 @@
 
 .eduzen .description {
     display: block;
-    margin: 4px;
+    margin-top: 4px;
 }
 
 .eduzen .associations {
@@ -119,12 +155,16 @@
 }
 
 .eduzen .topicalarea {
-    background-color: #12b4d7; color: #4a4a4a;
+    color: #4a4a4a;
     padding: 2px; font-size:12px; padding-left: 4px; padding-right: 4px;
 }
 
+.eduzen .topicalarea:hover {
+    /** background-color: #12b4d7; **/
+}
+
 .eduzen a.topicalarea {
-    cursor: pointer; text-decoration: none; font-weight: bold;
+    cursor: pointer; text-decoration: underline; font-weight: bold;
 }
 
 /** .eduzen #page {
@@ -189,17 +229,32 @@
     width: 35%;
 }
 
+.eduzen .button.disabled,
+.eduzen .button,
 .eduzen input.button {
     font-weight: bold;
     /** background-color: #fff; **/
     padding: 8px; color: #fff;
+    margin-top: 4px;
 }
 
-eduzen input.button:focus {
+.eduzen .button:focus,
+.eduzen input.button:focus {
     color:#fff;
     border: 1px solid #ffc700;
 }
 
+.eduzen .button.disabled {
+    background-color: #afafaf;
+    background-image: none;
+    cursor: default !important;
+}
+
+.eduzen .button.disabled a {
+    cursor: default !important;
+}
+
+.eduzen .button,
 .eduzen input.button {
     background-image: linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
     background-image: -o-linear-gradient(bottom, rgb(8,87,144) 36%, rgb(34,114,173) 68%);
@@ -214,6 +269,11 @@ eduzen input.button:focus {
       color-stop(0.36, rgb(8,87,144)),
       color-stop(0.68, rgb(34,114,173))
     );
+}
+
+.eduzen .button a {
+  border: none;
+  color: #fff;
 }
 
 .eduzen a:focus,
