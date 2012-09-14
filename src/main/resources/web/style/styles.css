@@ -100,7 +100,22 @@
 }
 
 .eduzen .add-excercise a:focus {
-  border: none;
+    border: none;
+}
+
+.eduzen .excercise-collection {
+    float: left; text-align: left;
+    padding: 4px;
+}
+
+.eduzen .excercise-element {
+    float: left; text-align: left;
+    border: 1px solid #2486bb; margin: 4px; padding: 4px;
+    font-size: 12px; padding-right: 10px;
+}
+
+.eduzen .excercise-element .button {
+  cursor: pointer;
 }
 
 /** Typography, Buttons and Emphasizers **/

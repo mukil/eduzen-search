@@ -35,7 +35,7 @@ var filterView = new function () {
       filterView.doSearch(value)
     } else if (commands[0] === "doshow") {
       var exId = parseInt(commands[1].substr(commands[1].indexOf("=") + 1))
-      filterView.showResultItem(undefined, exId)
+      filterView.showResultDetails(undefined, exId)
     }
   }
 
@@ -49,7 +49,7 @@ var filterView = new function () {
       var searchInput = $("[name=searchfield]").val()
       searchValue = searchInput
     }
-    if (searchValue === "" || typeof(searchValue) == "object" || !(/\S/.test(searchValue))) return
+    if (searchValue === "" || typeof(searchValue) == "object" || !(/\S/.test(searchValue))) return // empty check
     
     var resultCount = 0
     try {
@@ -96,8 +96,11 @@ var filterView = new function () {
 
     for (i=0; i < filterView.results.length; i++) { // for each result item
       var result = filterView.results[i]
+      // gets an id of any object-type we searched for
       var moreOutput = "<li id=\"" + result.id + "\" class=\"result-item\">"
         + "<a class=\"item-handler\">" + result.value + "</a>"
+
+      // to find a sample solution, we first have to query for the related excercise_text of the result-object
       var hasSampleSolution = false
       var excerciseText = { items: new Array(), total_count: 1}
       if (result.type_uri === "tub.eduzen.excercise_text") {
@@ -105,7 +108,6 @@ var filterView = new function () {
       } else {
         excerciseText = dmc.get_related_topics(result.id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
       }
-
       if (excerciseText.items[0] != undefined) { // fixme: there should always be just one, so we`re taking the 1st
         exId = excerciseText.items[0].id
         // to get all taken excercises for this specific eText
@@ -128,7 +130,6 @@ var filterView = new function () {
         } else {
           // console.log("no excercise taken for eText " + excerciseText.items[0].value)
         }
-        // console.log("hasSampleSolution => " + hasSampleSolution)
         moreOutput += "<span class=\"sample-solution " + hasSampleSolution + "\">" + hasSampleSolution + "</span>"
           + "<span class=\"more-info\">ist <i>" + dict.typeName(result.type_uri) + "</i>"
 
@@ -147,7 +148,7 @@ var filterView = new function () {
       $("#result-list").append(moreOutput)
     }
 
-    $("a.item-handler", "#result-list").click(filterView.showResultItem);
+    $("a.item-handler", "#result-list").click(filterView.showResultDetails); // works with event.target.parentNode
   }
 
   this.emptyResultList = function () {
@@ -160,46 +161,45 @@ var filterView = new function () {
 
   /** Controlling display of a specific excercise by given id or given DOM-target **/
 
-  this.showResultItem = function (e, id) {
-    // this handler is currently also registered for excercise_objects..
-    var exId = ""
+  this.showResultDetails = function (e, id) {
+    // note: this handler either gets an id of type excercise_text, and it finds it based on either:
+    // - a manually clicked/given DOM target or a given id as a parameter
+    // (if unsuccessfull it navigates to the 1st related excercise_text object of the resp. id)
     var targetId = undefined
     var result = undefined
-    if (e != undefined) { // manually clicked
+    if (e != undefined) { // "manually" called showResultItem
       targetId = parseInt(e.target.parentElement.id)
       result = dmc.get_topic_by_id(targetId)
-      var excerciseTopic = { items: new Array(), total_count: 1}
-      if (result.type_uri === "tub.eduzen.excercise_text") {
-        excerciseTopic.items.push(result)
-      } else {
+      if (result.type_uri !== "tub.eduzen.excercise_text") {
         excerciseTopic = dmc.get_related_topics(result.id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
+        if (excerciseTopic.items[0] != undefined) {
+          result = dmc.get_topic_by_id(excerciseTopic.items[0].id) // fetch_composite=true
+        } else {
+          throw new Error ("could not find any related excercise_text for nodeId => " + targetId)
+        }
       }
-      if (excerciseTopic.items[0] != undefined) {
-        exId = excerciseTopic.items[0].id
-      } else {
-        console.log("ERROR: cannot find related excercise_text for nodeId => " + targetId)
-        exId = undefined
-      }
-    } else { // programmatically called showResultItem, yet unused
-      exId = id
+    } else { // programmatically called showResultItem
+      result = dmc.get_topic_by_id(id)
     }
-    filterView.showExcercise(exId, targetId)
-    filterView.push_history({"action": "doshow", "parameter": exId}, "#doshow?id=" + exId)
+    filterView.renderExcercise(result, targetId)
+    filterView.push_history({"action": "doshow", "parameter": result.id}, "#doshow?id=" + result.id)
   }
 
-  this.showExcercise = function (eId, tId) {
+  this.renderExcercise = function (excercise, tId) {
     var parentRenderer = "#"
-    var excercise = dmc.get_topic_by_id(eId)
+    /** var excercise = ex
+    console.log(excercise)
+    if (excercise.composite == undefined) {
+      excercise = dmc.get_topic_by_id(ex.id)
+    }*/
     var nameOfExcercise = excercise.composite['tub.eduzen.excercise_name'].value
     var descriptionOfExcercise = excercise.composite['tub.eduzen.excercise_description'].value
 
     if (tId == undefined) { // programmatically called, to show some result-list
-      filterView.results = [excercise]
-      filterView.showResults()
-      // excerciseId is resultItemList.targetId
-      // no recursive call making sure tId != undefined
-      filterView.showExcercise(excercise.id, excercise.id) // simulate manual selection of resultItem
-      $(parentRenderer + " .excercise-view").show()
+      filterView.results = [excercise] // populate result list
+      filterView.showResults(excercise, excercise.id) // render result list
+      filterView.renderExcercise(excercise, excercise.id) // then show excercise
+      // $(parentRenderer + " .excercise-view").show()
       return
     } else {
       parentRenderer = parentRenderer + "" + tId // manually clicked, go on and toggle excercise in resultList
@@ -213,7 +213,7 @@ var filterView = new function () {
       $(parentRenderer + " .excercise-view").show()
     }
 
-    var viewOutput = "<div class=\"excercise-view\" id=\"" + eId + "\">"
+    var viewOutput = "<div class=\"excercise-view\" id=\"" + excercise.id + "\">"
       viewOutput += "<span class=\"label\">Aufgabenstellung</span><br/>"
       // viewOutput += "<span class=\"name\"><a href=\"#doshow?id=" + excercise.id + "\" id=\""
         // + excercise.id + "\" >" + nameOfExcercise + "</a></span>"
@@ -223,7 +223,7 @@ var filterView = new function () {
       $("#page").append("<a href=\"javascript:filterView.copyToClipboard("
         + pasteValue + ")\">copy + paste excercise</a>") */
 
-      var excerciseObjects = dmc.get_related_topics(eId, {"assoc_type_uri": "tub.eduzen.compatible",
+      var excerciseObjects = dmc.get_related_topics(excercise.id, {"assoc_type_uri": "tub.eduzen.compatible",
         "others_topic_type_uri": "tub.eduzen.excercise_object"})
       if (excerciseObjects.total_count > 0) {
         viewOutput += "<br/><span class=\"label\">Dazu kompatible Aufgabenobjekte:</span><br/>"
@@ -233,18 +233,19 @@ var filterView = new function () {
           var excerciseObject = excerciseObjects.items[object]
           objectString += "<li id=\"" + excerciseObject.id + "\""
             + "onclick=\"javascript:filterView.toggleExcerciseObject(" + excerciseObject.id
-            + ", " + eId + ")\"><a class=\"excercise-object\">" + excerciseObject.value +"</a></li>"
+            + ", " + excercise.id + ")\"><a class=\"excercise-object\">" + excerciseObject.value +"</a></li>"
         }
         objectString += "</ul>"
         viewOutput += objectString
-        viewOutput += "<div class=\"add-excercise button disabled " + eId + "\"><a>Aufgabe ausw&auml;hlen"
+        // view/model this renders always a button with an id of type excercise_text
+        viewOutput += "<div class=\"add-excercise button disabled " + excercise.id + "\"><a>Aufgabe ausw&auml;hlen"
           + "</a></div><div class=\"add-excercise-object label hint\">"
           + "Hinweis: Um diese Aufgabe Ihrem &Uuml;bungszettel hinzuf&uuml;gen zu k&ouml;nnen,"
           + "w&auml;hlen Sie bitte mind. 1 dazu kompatibles <i class=\"excercise-object\">Aufgabenobjekt</i>"
           + "aus.</div>"
       } else {
-        viewOutput += "<div class=\"add-excercise button " + eId
-          + "\" onclick=\"javascript:filterView.selectExcercise(" + eId + ")\">"
+        viewOutput += "<div class=\"add-excercise button " + excercise.id
+          + "\" onclick=\"javascript:filterView.selectExcerciseText(" + excercise.id + ")\">"
           + "<a>Aufgabe ausw&auml;hlen</a></div>"
       }
       viewOutput += "</div>"
@@ -258,21 +259,66 @@ var filterView = new function () {
     filterView.showResults()
   }
 
-  /** Controlling a collection of excercises **/
+  /** Controlling a collection of excercises, selects an excercise_text (main object type for organizing excercises) **/
 
-  this.selectExcercise = function (eId) {
-    console.log("adding excercise " + eId + " to practice sheet ...")
-    filterView.addExcerciseToCollection(eId)
+  this.selectExcerciseText = function (eId) {
+    var id = eId
+    if ("object" === typeof(eId)) {
+      id = parseInt(eId.target.parentNode.parentElement.id) // insert .parentElement to take id from result-item <li>
+      // console.log("selectExcerciseText restored id for operations from view..")
+      // console.log(eId.target.parentNode.parentElement.id)
+    }
+    var excercise = dmc.get_topic_by_id(id)
+    if (excercise.type_uri !== "tub.eduzen.excercise_text") {
+      throw new TypeError("filterView.selectExcerciseText-method just likes id`s of type \"tub.eduzen.excercise_text\"")
+      /** excercise = filterView.getExcerciseResultObjectById(id)
+      if (!excercise) {
+          // id which was given is not part of the result-list, check for related excercise_text to add to collection
+          excerciseText = dmc.get_related_topics(id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
+          console.log(excerciseText)
+          if (excerciseText.items[0] != undefined) {
+            exercise = excerciseText.items[0]
+          } else {
+            throw new TypeError("could not load related \"tub.eduzen.excercise_text\" for given id (" + id + ")")
+          }
+      } else {
+        console.log("adding \"" + dict.typeName(excercise.type_uri) + "\" " + excercise.id + " to practice sheet ...")
+      }**/
+    }
+    console.log("adding \"" + dict.typeName(excercise.type_uri) + "\" " + excercise.id + " to practice sheet ...")
+    filterView.addExcerciseToCollection(excercise)
     console.log(filterView.e_collection)
   }
 
-  this.addExcerciseToCollection = function (id) {
-    // in development, not yet working
-    if(typeof(id) == "object") {
-      id = parseInt(id.delegateTarget.parentElement.id)
+  this.addExcerciseToCollection = function (excercise_text) {
+    filterView.e_collection.push(excercise_text)
+    filterView.updateCollectionView()
+  }
+
+  this.updateCollectionView = function () {
+    var numberOfItems = filterView.e_collection.length
+    var frame = "<div id=\"frame\" class=\"excercise-collection\"><b class=\"label\">" + numberOfItems
+      + " Aufgabe/n in Ihrem &Uuml;bungszettel</b></div>"
+    var elements = ""
+
+    for (i=0; i < filterView.e_collection.length; i++) {
+      var item = filterView.e_collection[i]
+      var remove = "<a id=\"el-" + item.id + "\" class=\"button\"><b>-</b></a>"
+      elements += "<div class=\"excercise-element " + item.id + "\">" + (i+1) + ") " + item.value + " " + remove + "</div>"
     }
-    filterView.e_collection.push(id)
-    console.log(filterView.e_collection)
+
+    $("#bottom").html(frame)
+    $("#frame").html(elements)
+  }
+
+  this.getExcerciseResultObjectById = function (id) {
+    // model
+    for (i=0; i < filterView.results.length; i++) {
+      var result = filterView.results[i]
+      // console.log(result['id'] + " type " + result.type_uri + " compared to givenId " + id)
+      if (result['id'] == id) return result
+    }
+    return
   }
 
   /** Controlling one/many related excercise_objects for each listed excercise **/
@@ -301,7 +347,7 @@ var filterView = new function () {
     if (filterView.e_objects[eId].length > 0) {
       $(".add-excercise.button."+ eId).removeClass("disabled")
       $(".add-excercise.button."+ eId).unbind("click")
-      $(".add-excercise.button."+ eId).click(filterView.addExcerciseToCollection)
+      $(".add-excercise.button."+ eId).click(filterView.selectExcerciseText)
     } else {
       $(".add-excercise.button."+ eId).addClass("disabled")
       $(".add-excercise.button."+ eId).unbind("click")
@@ -344,7 +390,7 @@ var filterView = new function () {
       filterView.doSearch(searchValue)
     } else if (state.action == "doshow") {
       var exId = state.parameter
-      filterView.showResultItem(undefined, exId)
+      filterView.showResultDetails(undefined, exId)
     }
   }
 
