@@ -10,6 +10,7 @@
 .eduzen #header {
     margin-left: 20px; margin-top: 20px;
     background-color: #fff;
+    z-index: 999;
 }
 
 .eduzen #top-form {  }
@@ -30,6 +31,7 @@
     border-top: 2px solid #12b4d7;
     background-color: #fff;
     width: 100%;
+    z-index: 998;
 }
 
 .eduzen .title {
@@ -53,9 +55,11 @@
 
 .eduzen #results {
     float: left;
-    overflow-y: auto;
+    /* overflow-y: auto;
     max-height: 70%;
-    padding-right: 20px;
+    padding-right: 20px; **/
+    height: 100%;
+    z-index: 1;
 }
 
 .eduzen #result-list {
@@ -194,7 +198,8 @@
 } **/
 
 .eduzen .result-item {
-    cursor: pointer;
+    /** cursor: pointer; **/
+    margin-top: 40px;
 }
 
 .eduzen ol {
@@ -227,11 +232,15 @@
 }
 
 .eduzen li .sample-solution.true {
-  font-size: 12px; text-transform: uppercase; color: #00ff00;
+    height: 15px; width: 15px; display: inline;
+    -moz-border-radius: 10px; border-radius: 10px;
+    background-color: #99cc00; float: right;
 }
 
 .eduzen li .sample-solution.false {
-  font-size: 12px; text-transform: uppercase; color: #ff0000;
+    height: 15px; width: 15px; display: inline;
+    -moz-border-radius: 10px; border-radius: 10px;
+    background-color: #cc4120; float: right;
 }
 
 .eduzen input, textarea {

@@ -98,7 +98,7 @@ var filterView = new function () {
       var result = filterView.results[i]
       // gets an id of any object-type we searched for
       var moreOutput = "<li id=\"" + result.id + "\" class=\"result-item\">"
-        + "<a class=\"item-handler\">" + result.value + "</a>"
+        + "<a class=\"item-handler\" href=\"javascript:void(0);\">" + result.value + "</a>"
 
       // to find a sample solution, we first have to query for the related excercise_text of the result-object
       var hasSampleSolution = false
@@ -130,7 +130,7 @@ var filterView = new function () {
         } else {
           // console.log("no excercise taken for eText " + excerciseText.items[0].value)
         }
-        moreOutput += "<span class=\"sample-solution " + hasSampleSolution + "\">" + hasSampleSolution + "</span>"
+        moreOutput += "<div class=\"sample-solution " + hasSampleSolution + "\" title=\".. hat Musterloesung\"></div>"
           + "<span class=\"more-info\">ist <i>" + dict.typeName(result.type_uri) + "</i>"
 
         var topicalareas = dmc.get_related_topics(exId, {"others_topic_type_uri": "tub.eduzen.topicalarea"})
@@ -187,11 +187,6 @@ var filterView = new function () {
 
   this.renderExcercise = function (excercise, tId) {
     var parentRenderer = "#"
-    /** var excercise = ex
-    console.log(excercise)
-    if (excercise.composite == undefined) {
-      excercise = dmc.get_topic_by_id(ex.id)
-    }*/
     var nameOfExcercise = excercise.composite['tub.eduzen.excercise_name'].value
     var descriptionOfExcercise = excercise.composite['tub.eduzen.excercise_description'].value
 
@@ -206,56 +201,59 @@ var filterView = new function () {
     }
 
     if ($(parentRenderer + " .excercise-view").length > 0) {
-      // if excercise view was already loaded, just show it
+      // if excervise-view has child-elements, interpret click as view-toggle and break
       $(parentRenderer + " .excercise-view").toggle()
       return
-    } else {
-      $(parentRenderer + " .excercise-view").show()
     }
 
-    var viewOutput = "<div class=\"excercise-view\" id=\"" + excercise.id + "\">"
-      viewOutput += "<span class=\"label\">Aufgabenstellung</span><br/>"
-      // viewOutput += "<span class=\"name\"><a href=\"#doshow?id=" + excercise.id + "\" id=\""
+    var excerciseView = "<div class=\"excercise-view\" id=\"" + excercise.id + "\">"
+      excerciseView += "<span class=\"label\">Aufgabenstellung</span><br/>"
+      // excerciseView += "<span class=\"name\"><a href=\"#doshow?id=" + excercise.id + "\" id=\""
         // + excercise.id + "\" >" + nameOfExcercise + "</a></span>"
-      viewOutput += "<span class=\"description\">" + descriptionOfExcercise + "</span>"
-
-      /** var pasteValue = nameOfExcercise + descriptionOfExcercise
-      $("#page").append("<a href=\"javascript:filterView.copyToClipboard("
-        + pasteValue + ")\">copy + paste excercise</a>") */
+      excerciseView += "<span class=\"description\">" + descriptionOfExcercise + "</span>"
 
       var excerciseObjects = dmc.get_related_topics(excercise.id, {"assoc_type_uri": "tub.eduzen.compatible",
         "others_topic_type_uri": "tub.eduzen.excercise_object"})
       if (excerciseObjects.total_count > 0) {
-        viewOutput += "<br/><span class=\"label\">Dazu kompatible Aufgabenobjekte:</span><br/>"
+        excerciseView += "<br/><span class=\"label\">Dazu kompatible Aufgabenobjekte:</span><br/>"
 
         var objectString = "<ul class=\"objects\">"
         for (object in excerciseObjects.items) {
           var excerciseObject = excerciseObjects.items[object]
           objectString += "<li id=\"" + excerciseObject.id + "\""
             + "onclick=\"javascript:filterView.toggleExcerciseObject(" + excerciseObject.id
-            + ", " + excercise.id + ")\"><a class=\"excercise-object\">" + excerciseObject.value +"</a></li>"
+            + ", " + excercise.id + ")\"><a href=\"javascript:void(0);\" class=\"excercise-object\">"
+            + excerciseObject.value +"</a></li>"
         }
         objectString += "</ul>"
-        viewOutput += objectString
+        excerciseView += objectString
         // view/model this renders always a button with an id of type excercise_text
-        viewOutput += "<div class=\"add-excercise button disabled " + excercise.id + "\"><a>Aufgabe ausw&auml;hlen"
+        excerciseView += "<div class=\"add-excercise button disabled " + excercise.id + "\">"
+          + "<a href=\"javascript:void(0);\">Aufgabe ausw&auml;hlen"
           + "</a></div><div class=\"add-excercise-object label hint\">"
           + "Hinweis: Um diese Aufgabe Ihrem &Uuml;bungszettel hinzuf&uuml;gen zu k&ouml;nnen,"
           + "w&auml;hlen Sie bitte mind. 1 dazu kompatibles <i class=\"excercise-object\">Aufgabenobjekt</i>"
           + "aus.</div>"
       } else {
-        viewOutput += "<div class=\"add-excercise button " + excercise.id
+        excerciseView += "<div class=\"add-excercise button " + excercise.id
           + "\" onclick=\"javascript:filterView.selectExcerciseText(" + excercise.id + ")\">"
-          + "<a>Aufgabe ausw&auml;hlen</a></div>"
+          + "<a href=\"javascript:void(0);\">Aufgabe ausw&auml;hlen</a></div>"
       }
-      viewOutput += "</div>"
-    $(parentRenderer).append(viewOutput)
+      excerciseView += "</div>"
+    $(parentRenderer).append(excerciseView)
     $(parentRenderer).show()
   }
   
   this.clickTopicalArea = function (topicalId) {
     var excerciseTexts = filterView.get_excercises_by_topicalarea(topicalId)
     filterView.results = excerciseTexts
+    var topicalArea = dmc.get_topic_by_id(topicalId) // to be removed
+    var resultObject = {
+      size: excerciseTexts.length, overallCount: excerciseTexts.length,
+      searchFor: "Themenkomplex: " + topicalArea.value
+    }
+    // updating gui after a query
+    filterView.showResultHeader(resultObject)
     filterView.showResults()
   }
 
@@ -263,36 +261,43 @@ var filterView = new function () {
 
   this.selectExcerciseText = function (eId) {
     var id = eId
-    if ("object" === typeof(eId)) {
+    if ("object" === typeof(eId)) { // we assume an DOM.Event-object was given to us
       id = parseInt(eId.target.parentNode.parentElement.id) // insert .parentElement to take id from result-item <li>
-      // console.log("selectExcerciseText restored id for operations from view..")
-      // console.log(eId.target.parentNode.parentElement.id)
     }
-    var excercise = dmc.get_topic_by_id(id)
+    var excercise = dmc.get_topic_by_id(id) // result items in our result-list can be of various types, tbmp: 3types atm
     if (excercise.type_uri !== "tub.eduzen.excercise_text") {
-      throw new TypeError("filterView.selectExcerciseText-method just likes id`s of type \"tub.eduzen.excercise_text\"")
-      /** excercise = filterView.getExcerciseResultObjectById(id)
-      if (!excercise) {
-          // id which was given is not part of the result-list, check for related excercise_text to add to collection
-          excerciseText = dmc.get_related_topics(id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
-          console.log(excerciseText)
-          if (excerciseText.items[0] != undefined) {
-            exercise = excerciseText.items[0]
-          } else {
-            throw new TypeError("could not load related \"tub.eduzen.excercise_text\" for given id (" + id + ")")
-          }
-      } else {
-        console.log("adding \"" + dict.typeName(excercise.type_uri) + "\" " + excercise.id + " to practice sheet ...")
-      }**/
+        // check for related excercise_text to add to collection
+        excerciseText = dmc.get_related_topics(id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
+        if (excerciseText.items[0] != undefined) {
+          exercise = excerciseText.items[0]
+        } else {
+          throw new TypeError("could not find a related \"tub.eduzen.excercise_text\" for given \""
+            + excercise.type_uri + "\" id (" + id + ")")
+        }
     }
-    console.log("adding \"" + dict.typeName(excercise.type_uri) + "\" " + excercise.id + " to practice sheet ...")
+    // console.log("adding \"" + dict.typeName(excercise.type_uri) + "\" " + excercise.id + " to practice sheet ...")
     filterView.addExcerciseToCollection(excercise)
-    console.log(filterView.e_collection)
   }
 
   this.addExcerciseToCollection = function (excercise_text) {
-    filterView.e_collection.push(excercise_text)
-    filterView.updateCollectionView()
+    if (!filterView.hasCollectionExcercise(excercise_text.id)) {
+      filterView.e_collection.push(excercise_text)
+      filterView.updateCollectionView()
+    } else {
+      // TODO: display that "excercise is already part of the collection and it was not added " to our user
+      console.log("INFO: excercise was already added to your collection of excercises, so we skipped adding it again.")
+    }
+  }
+
+  this.removeExcerciseFromCollection = function (id) {
+    for (i=0; i < filterView.e_collection.length; i++) {
+      excercise = filterView.e_collection[i]
+      if (excercise.id == id) {
+        filterView.e_collection.splice(i, 1)
+        filterView.updateCollectionView()
+        return
+      }
+    }
   }
 
   this.updateCollectionView = function () {
@@ -303,16 +308,30 @@ var filterView = new function () {
 
     for (i=0; i < filterView.e_collection.length; i++) {
       var item = filterView.e_collection[i]
-      var remove = "<a id=\"el-" + item.id + "\" class=\"button\"><b>-</b></a>"
-      elements += "<div class=\"excercise-element " + item.id + "\">" + (i+1) + ") " + item.value + " " + remove + "</div>"
+      var remove = "<a id=\"el-" + item.id + "\" href=\"javascript:void(0);\" class=\"button\"><b>-</b></a>"
+      elements += "<div class=\"excercise-element " + item.id + "\" "
+        + "onclick=\"javascript:filterView.removeExcerciseFromCollection(" + item.id + ")\">"
+        + (i+1) + ") " + item.value + " " + remove + "</div>"
+    }
+
+    if (filterView.e_collection.length == 0) {
+      frame = "<b class=\"label\">W&auml;hlen Sie Aufgaben f&uuml;r Ihren &Uuml;bungszettel</b>"
     }
 
     $("#bottom").html(frame)
     $("#frame").html(elements)
   }
 
+  this.hasCollectionExcercise = function (id) {
+    for (i=0; i < filterView.e_collection.length; i++) {
+      var result = filterView.e_collection[i]
+      if (result['id'] == id) return true
+    }
+    return false
+  }
+
   this.getExcerciseResultObjectById = function (id) {
-    // model
+    // fetch from client side result-list model
     for (i=0; i < filterView.results.length; i++) {
       var result = filterView.results[i]
       // console.log(result['id'] + " type " + result.type_uri + " compared to givenId " + id)
@@ -376,14 +395,12 @@ var filterView = new function () {
 
   /** More general methods **/
 
-  this.copyToClipboard = function (text) {
+  this.copyToClipboard = function (text) { // yet unused
     window.prompt ("Copy to clipboard: STRG+C, Enter", text)
   }
 
   this.pop_history = function (state) {
     if (!filterView.historyApiSupported) return
-    console.log("popping_")
-    console.log(state)
     if (state.action == "dosearch") {
       var searchValue = state.parameter.searchFor
       $("[name=searchfield]").val("" + searchValue + "")
@@ -396,8 +413,6 @@ var filterView = new function () {
 
   this.push_history = function (state, link) {
     if (!filterView.historyApiSupported) return
-    console.log("pushing_")
-    console.log(state)
     var history_entry = {state: state, url: link}
     window.history.pushState(history_entry.state, null, history_entry.url)
   }
