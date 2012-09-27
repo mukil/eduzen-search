@@ -83,7 +83,7 @@ var filterView = new function () {
       return
     }
     $("#result-count").html("Ihre Anfrage nach \"" + rO.searchFor + "\" lieferte <b>"
-      + rO.size + "</b> von " + rO.overallCount + " insg. Aufgabenstellungen")
+      + rO.size + "</b> von " + rO.overallCount + " insg. <i>Aufgabenstellungen</i>")
   }
 
   /** 
@@ -220,9 +220,9 @@ var filterView = new function () {
         var objectString = "<ul class=\"objects\">"
         for (object in excerciseObjects.items) {
           var excerciseObject = excerciseObjects.items[object]
-          objectString += "<li id=\"" + excerciseObject.id + "\""
+          objectString += "<li class=\"excercise-object\" id=\"" + excerciseObject.id + "\""
             + "onclick=\"javascript:filterView.toggleExcerciseObject(" + excerciseObject.id
-            + ", " + excercise.id + ")\"><a href=\"javascript:void(0);\" class=\"excercise-object\">"
+            + ", " + excercise.id + ")\"><a href=\"javascript:void(0);\">"
             + excerciseObject.value +"</a></li>"
         }
         objectString += "</ul>"
@@ -367,9 +367,12 @@ var filterView = new function () {
       $(".add-excercise.button."+ eId).removeClass("disabled")
       $(".add-excercise.button."+ eId).unbind("click")
       $(".add-excercise.button."+ eId).click(filterView.selectExcerciseText)
+      $("#" + eId + " .add-excercise-object.label.hint").hide()
     } else {
       $(".add-excercise.button."+ eId).addClass("disabled")
       $(".add-excercise.button."+ eId).unbind("click")
+      $(".add-excercise-object.label.hint").show()
+      $("#" + eId + " .add-excercise-object.label.hint").show()
     }
   }
 

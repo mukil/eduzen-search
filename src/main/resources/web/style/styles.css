@@ -8,9 +8,10 @@
 }
 
 .eduzen #header {
-    margin-left: 20px; margin-top: 20px;
-    background-color: #fff;
-    z-index: 999;
+    padding-left: 30px; padding-top: 20px;
+    padding-right: 30px; width: 100%;
+    background-color: #fff; height: 100px;
+    z-index: 999; position: fixed; top: 0px;
 }
 
 .eduzen #top-form {  }
@@ -60,6 +61,8 @@
     padding-right: 20px; **/
     height: 100%;
     z-index: 1;
+    margin-bottom: 65px;
+    margin-top: 80px;
 }
 
 .eduzen #result-list {
@@ -96,6 +99,10 @@
 .eduzen .add-excercise-object {
     padding: 4px; padding-right: 8px;
     font-size: 12px;
+}
+
+.eduzen .excercise-object {
+    cursor: pointer;
 }
 
 .eduzen .add-excercise {
@@ -215,6 +222,7 @@
 .eduzen li a {
     text-decoration: none;
     color: #000000;
+    padding-right: 10px;
 }
 
 /** .eduzen li a:hover {
@@ -260,6 +268,7 @@
     /** background-color: #fff; **/
     padding: 8px; color: #fff;
     margin-top: 4px;
+    cursor: pointer;
 }
 
 .eduzen .button:focus,
