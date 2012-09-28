@@ -53,16 +53,15 @@ var filterView = new function () {
     
     var resultCount = 0
     try {
-      var excercise_names = dmc.search_topics(null, searchValue, "tub.eduzen.excercise_name", false)
-      resultCount += excercise_names.length
+      var excercise_names = dmc.search_topics(searchValue, "tub.eduzen.excercise_name")
+      if (excercise_names != undefined) resultCount += excercise_names.length
     } catch (err) { console.log("cathing name search error.. ") }
     try {
-      var excercise_descs = dmc.search_topics(null, searchValue, "tub.eduzen.excercise_description", false)
-      resultCount += excercise_descs.length
+      var excercise_descs = dmc.search_topics(searchValue, "tub.eduzen.excercise_description")
+      if (excercise_descs != undefined) resultCount += excercise_descs.length
     } catch (err) { console.log("cathing description search error.. ") }
     var existing_enames = dmc.get_topics("tub.eduzen.excercise_name", false) // fixme: just to GET a count
     // var excercise_objects = dmc.search_topics(null, searchValue, "tub.eduzen.excercise_object", false)
-
     var resultObject = {
       size: resultCount, overallCount: existing_enames.items.length, searchFor: searchValue
     }
@@ -72,7 +71,7 @@ var filterView = new function () {
     filterView.showResultHeader(resultObject)
     filterView.results = excercise_names.concat(excercise_descs)
     filterView.showResults()
-
+    console.log(dmc.search_topics(searchValue, "tub.eduzen.excercise_object"))
     filterView.push_history({"action": "dosearch", "parameter": resultObject}, "#dosearch?for=" + searchValue)
   }
 
@@ -106,17 +105,17 @@ var filterView = new function () {
       if (result.type_uri === "tub.eduzen.excercise_text") {
         excerciseText.items.push(result)
       } else {
-        excerciseText = dmc.get_related_topics(result.id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
+        excerciseText = dmc.get_topic_related_topics(result.id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
       }
       if (excerciseText.items[0] != undefined) { // fixme: there should always be just one, so we`re taking the 1st
         exId = excerciseText.items[0].id
         // to get all taken excercises for this specific eText
-        var excercises = dmc.get_related_topics(exId, {"others_topic_type_uri": "tub.eduzen.excercise"})
+        var excercises = dmc.get_topic_related_topics(exId, {"others_topic_type_uri": "tub.eduzen.excercise"})
         if (excercises.total_count > 0) { //
           // console.log(excercises.items.length + " times taken " + excerciseText.items[0].value + " excercise")
           for (taken in excercises.items) { // get all approaches submitted to this excercise
             var excerciseId = excercises.items[taken].id
-            var approaches = dmc.get_related_topics(excerciseId, {"others_topic_type_uri": "tub.eduzen.approach"})
+            var approaches = dmc.get_topic_related_topics(excerciseId, {"others_topic_type_uri": "tub.eduzen.approach"})
             if (approaches.total_count > 0) { // find sample solutions..
               for (a in approaches.items) { // get all approaches marked as sample solution
                 var approach = approaches.items[a]
@@ -133,7 +132,7 @@ var filterView = new function () {
         moreOutput += "<div class=\"sample-solution " + hasSampleSolution + "\" title=\".. hat Musterloesung\"></div>"
           + "<span class=\"more-info\">ist <i>" + dict.typeName(result.type_uri) + "</i>"
 
-        var topicalareas = dmc.get_related_topics(exId, {"others_topic_type_uri": "tub.eduzen.topicalarea"})
+        var topicalareas = dmc.get_topic_related_topics(exId, {"others_topic_type_uri": "tub.eduzen.topicalarea"})
         if (topicalareas.total_count > 0) {
           moreOutput += "&nbsp;und ist verbunden mit dem/den <i class=\"label\">Themenkomplex(en):</i>"
           for (topic in topicalareas.items) {
@@ -171,7 +170,7 @@ var filterView = new function () {
       targetId = parseInt(e.target.parentElement.id)
       result = dmc.get_topic_by_id(targetId)
       if (result.type_uri !== "tub.eduzen.excercise_text") {
-        excerciseTopic = dmc.get_related_topics(result.id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
+        excerciseTopic = dmc.get_topic_related_topics(result.id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
         if (excerciseTopic.items[0] != undefined) {
           result = dmc.get_topic_by_id(excerciseTopic.items[0].id) // fetch_composite=true
         } else {
@@ -212,7 +211,7 @@ var filterView = new function () {
         // + excercise.id + "\" >" + nameOfExcercise + "</a></span>"
       excerciseView += "<span class=\"description\">" + descriptionOfExcercise + "</span>"
 
-      var excerciseObjects = dmc.get_related_topics(excercise.id, {"assoc_type_uri": "tub.eduzen.compatible",
+      var excerciseObjects = dmc.get_topic_related_topics(excercise.id, {"assoc_type_uri": "tub.eduzen.compatible",
         "others_topic_type_uri": "tub.eduzen.excercise_object"})
       if (excerciseObjects.total_count > 0) {
         excerciseView += "<br/><span class=\"label\">Dazu kompatible Aufgabenobjekte:</span><br/>"
@@ -267,7 +266,7 @@ var filterView = new function () {
     var excercise = dmc.get_topic_by_id(id) // result items in our result-list can be of various types, tbmp: 3types atm
     if (excercise.type_uri !== "tub.eduzen.excercise_text") {
         // check for related excercise_text to add to collection
-        excerciseText = dmc.get_related_topics(id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
+        excerciseText = dmc.get_topic_related_topics(id, {"others_topic_type_uri": "tub.eduzen.excercise_text"})
         if (excerciseText.items[0] != undefined) {
           exercise = excerciseText.items[0]
         } else {
