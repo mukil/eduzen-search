@@ -71,7 +71,7 @@ var filterView = new function () {
     filterView.showResultHeader(resultObject)
     filterView.results = excercise_names.concat(excercise_descs)
     filterView.showResults()
-    console.log(dmc.search_topics(searchValue, "tub.eduzen.excercise_object"))
+    // console.log(dmc.search_topics(searchValue, "tub.eduzen.excercise_object"))
     filterView.push_history({"action": "dosearch", "parameter": resultObject}, "#dosearch?for=" + searchValue)
   }
 
@@ -120,7 +120,11 @@ var filterView = new function () {
               for (a in approaches.items) { // get all approaches marked as sample solution
                 var approach = approaches.items[a]
                 approach = dmc.get_topic_by_id(approach.id, true)
-                if (approach.composite["tub.eduzen.approach_sample"].value) hasSampleSolution = true
+                if (approach.composite["tub.eduzen.approach_sample"] != undefined) {
+                  if (approach.composite["tub.eduzen.approach_sample"].value) {
+                    hasSampleSolution = true
+                  }
+                }
               }
             } else {
               // console.log("no approaches submitted for eText " + excerciseText.items[0].value)
